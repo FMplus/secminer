@@ -1,0 +1,139 @@
+create  table user_info(
+id        int not null auto_increment,
+name      varchar(20) not null  unique,
+nickname      varchar(20) not null,
+addr      varchar(30) not null,
+gender    enum('m','f','u'),
+grade     varchar(10) not null,
+school    varchar(30) not null,
+password      varchar(10) not null,
+profile      varchar(100),
+phoneno       varchar(12) not null,
+primary key (id));
+
+create table person_tag(
+id    int not null,
+tag   varchar(30) not null,
+primary   key (id,tag),
+foreign   key (id) references user_info(id));
+
+
+create table super_user(
+id   int  not null auto_increment,
+password  varchar(10) not null,
+name      varchar(20) not null unique,
+primary key(id));
+
+
+create table buyer_info(
+id     int not null,
+credit   numeric(2,1) not null,
+primary  key (id),
+foreign key (id) references user_info(id));
+
+
+
+create table seller_info(
+id      int not null,
+credit    numeric(2,1) not null,
+primary  key (id),
+foreign  key (id) references user_info(id));
+
+
+create table goods_info(
+id         int  not null auto_increment,
+name       varchar(30) not null,
+usingdgr        numeric(2,1) not null,
+originalprice   float(4),
+currentprice    float(4) not null,
+dscrb      varchar(200),
+quantity        int not null,
+state      enum('sellout','onsell'),
+sid        int not null,
+primary key (id),
+foreign key (sid) references seller_info(id));
+
+
+create table goods_photo(
+id        int  not null,
+photo      varchar(100) not null,
+primary key (id,photo),
+foreign key (id) references goods_info(id));
+
+create table goods_tag(
+id         int not null,
+tag        varchar(20),
+primary key (id,tag),
+foreign key (id) references goods_info(id));
+
+
+create table sort_info(
+totalsort       varchar(20) not null,
+subsort         varchar(20),
+primary key  (totalsort));
+
+create table goods_sort(
+id         int not null,
+sort       varchar(20) not null,
+primary key  (id,sort),
+foreign key  (id) references goods_info(id),
+foreign key  (sort) references sort_info(totalsort));
+
+create table goods_focus(
+id         int not null,
+bid          int not null,
+primary key  (id,bid),
+foreign key  (id) references goods_info(id),
+foreign key  (bid) references buyer_info(id)); 
+
+create table goods_need(
+bid          int not null,
+content      varchar(200),
+foreign key  (bid) references buyer_info(id));
+
+create table msg_info(
+id       int not null auto_increment,
+time     timestamp,
+bid      int not null,
+sid      int not null,
+content  varchar(300) not null,
+primary key (id),
+foreign key (bid) references buyer_info(id),
+foreign key (sid) references seller_info(id));
+
+create table  order_info(
+id         int not null auto_increment,
+time         timestamp,
+state        enum('initial','canceled','waiting','delivering','completed'),
+bid         int not null,
+sid        int not null,
+totalcost       float(4),
+primary key  (id),
+foreign key  (bid) references buyer_info(id),
+foreign key  (sid) references seller_info(id));
+
+create table order_goods(
+gid         int not null,
+oid         int not null,
+quantity    int not null,
+price       float(4), 
+primary key (oid,gid),
+foreign key  (oid) references order_info(id),
+foreign key  (gid) references goods_info(id));
+
+create table comment_info(
+id          int not null auto_increment,
+time        timestamp,
+content     varchar(300) not null,
+oid         int  not null,
+primary key (id),
+foreign key  (oid) references order_info(id));
+
+create table reply_info(
+id           int auto_increment,
+time         timestamp,
+content      varchar(300) not null,
+cid          int  not null,
+primary key (id),
+foreign key  (cid) references comment_info(id));
+
