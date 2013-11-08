@@ -2,29 +2,48 @@
     include_once("config.php");
 
     class user_info{
-        public $name;
         public $id;
-        public $profile;
-        public $address;
+        public $name;
+        public $nickname;
+        
+        public $addr;
         public $gender;
-        public $location;
-        function __construct($name,$id,$profile,$address,$gender,$location){
+        public $grade;
+        
+        public $school;
+        public $profile;
+        public $phoneno;
+
+        function __construct($id,$name,$nickname,
+                             $addr,$gender,$grade,
+                             $school,$profile,$phoneno){
             $this -> name    = $name;
             $this -> id      = $id;
-            $this -> profile = $profile;
-            $this -> address = $address;
+            $this -> nickname= $nickname;
+            
+           
+            $this -> addr    = $addr;
             $this -> gender  = $gender;
-            $this -> location= $location;
+            $this -> grade   = $grade;
+
+            $this -> school  = $school;
+            $this -> profile = $profile;
+            $this -> phoneno = $phoneno;
         }
 
         
        function __toString() { 
-            return "user_info[name      =   $this->name,
-                              id        =   $this->id,
-                              profile   =   $this->profile,
-                              address   =   $this->address,
-                              gender    =   $this->gender,
-                              location  =   $this->location]"; 
+            return "user_info[ name     => $this -> name,
+                               id       => $this -> id,
+                               nickname => $this -> nickname,
+                               
+                               addr     => $this -> addr,
+                               gender   => $this -> gender,
+                               grade    => $this -> grade,
+
+                               school   => $this -> school,
+                               profile  => $this -> profile,
+                               phoneno  => $this -> phoneno]"; 
         }
     }
         
@@ -46,6 +65,7 @@
                 return null;
             }
             mysql_select_db($dbn, $this -> db_con);
+            $this -> query('SET NAMES GBK');
             return $this ->db_con;
         }
 
@@ -81,7 +101,8 @@
         }
 
         function lock(){
-            
+            $sql = "lock table user_info ";
+            return $this -> sm_db -> query($sql);
         }
 
         function open(){
@@ -92,11 +113,11 @@
             $this -> sm_db -> close();
         }
 
-        function search_uid($uid){
+        function search_uname($name){
             if(!$this -> sm_db -> is_open())
                 return null;
             $sql = "select count(*) as Existed from user_info 
-                    where ('$uid' = `uid`)";
+                    where ('$name' = `name`)";
             $result = $this -> sm_db -> query($sql);
             if (!$result)
             {
@@ -107,11 +128,14 @@
             return ($IsExisted > 0);
         }
         
-        function check_uid_psw_ok($uid,$psw){
+        function check_uname_psw_ok($name,$psw){
             if(!$this -> sm_db -> is_open())
                 return null;
+
+            $psw = md5($psw);
+
             $sql = "select count(*) as Existed from user_info 
-                    where ('$uid' = `uid` and '$psw' = `psw`)";
+                    where ('$name' = `name` and '$psw' = `password`)";
             $result = $this -> sm_db -> query($sql);
             if (!$result)
             {
@@ -126,47 +150,49 @@
             if(!$this -> sm_db -> is_open())
                 return null;
             
-            $sql = "insert into user_info(`uid`,`name`,`psw`,`profile`,`address`,`gender`,`location`)
-                    values ('{$user->id}','{$user->name}','$psw',
-                    '{$user->profile}','{$user->address}','{$user->gender}','{$user->location}')";
+            $psw = md5($psw);//password decoder!
+            
+            $sql = "insert into user_info(`name`,`nickname`,`password`,`profile`,`addr`,`gender`,`grade`,`school`,`phoneno`)
+                    values ('{$user -> name}','{$user -> nickname}','$psw','{$user -> profile}',
+                    '{$user -> addr}','{$user -> gender}','{$user -> grade}','{$user -> school}','{$user -> phoneno}')";
+
             $result = $this -> sm_db -> query($sql);
             return $result;
         }
 
-        function remove_user($uid){
+        function remove_user($id){
             if(!$this -> sm_db -> is_open())
                 return null;
                 
             $sql = "delete from user_info 
-                    where '$uid' = `uid`";
+                    where '$id' = `id`";
                     
             $result = $this -> sm_db -> query($sql);
             return $result;
         }
 
-        function fetch_user_info($uid,$psw){
+        function fetch_user_info($uname,$psw){
             if(!$this -> sm_db -> is_open())
                 return null;
-            if(!$this -> check_uid_psw_ok($uid,$psw)){
+            if(!$this -> check_uname_psw_ok($uname,$psw)){
                 die('Error: uname or password not match!');
             }
-            $sql   = "select name,id,profile,address,gender,location
+            $sql   = "select id,name,nickname,addr,gender,grade,school,profile,phoneno
                       from user_info 
-                      where ('$uid' = `uid` and '$psw' = `psw`)";
+                      where ('$uname' = `name`)";
             
             $result = $this -> sm_db -> query($sql);
             $row = mysql_fetch_array($result);
             
-            return new $user_info($row['name'],$row['id'],$row['profile'],$row['address'],$row['gender'],$row['location']);
+            return new user_info($row['id'],$row['name'],$row['nickname'],$row['addr'],$row['gender'],$row['grade'],$row['school'],$row['profile'],$row['phoneno']);
         }
 
-        function update_user_info($uid,$u_info){
+        function update_user_info($uid,$user){
             if(!$this -> sm_db -> is_open())
                 return null;
             $sql = "update user_info 
-                    set `name` = '{$user->name}',`profile` = '{$user->profile}', 
-                        `address` = '{$user->address}',`location` = '{$user->location}',`gender` = '{$user->gender}' 
-                    where `uid` = '$uid'";
+                    set `name`='{$user -> name}',`nickname`='{$user -> nickname}',`profile` = '{$user -> profile}',`addr`='{$user -> addr}',`gender`='{$user -> gender}',`grade`='{$user -> grade}',`school`='{$user -> school}',`phoneno`='{$user -> phoneno}'
+                    where `id` = '$uid'";
             $result = $this -> sm_db -> query($sql);        
             return $result;
         }
