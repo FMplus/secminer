@@ -1,0 +1,135 @@
+<html>
+<head>
+<meta charset="UTF-8"/>
+<link rel="stylesheet" type="text/css" href="css/signup.css" >
+</head>
+<script language = "JavaScript">
+	function check_signup(theform)
+	{
+		if (theform.nickname.value == "")
+		{
+			alert("请填写昵称!");
+			theform.nickname.focus();
+			return(false);
+		}
+		else if (theform.name.value == "")
+		{
+			alert("请填写用户名!");
+			theform.name.focus();
+			return(false);
+		}
+		else if (theform.password.value == "")
+		{
+			alert("请填写密码!");
+			theform.password.focus();
+			return(false);
+		}
+		else if (theform.repassword.value=="")
+		{
+			alert("请填写确认密码!");
+			theform.repassword.focus();
+			return(false);
+		}
+		else if (theform.repassword.value != theform.password.value)
+		{
+			alert("密码不一致!");
+			theform.repassword.focus();
+			return(false);
+		}
+		else if (theform.grade.value == "")
+		{
+			alert("请填写年级!");
+			theform.grade.focus();
+			return(false);
+		}
+		else if (theform.school.value == "")
+		{
+			alert("请填写学校!");
+			theform.school.focus();
+			return(false);
+		}
+		else if (theform.addr.value == "")
+		{
+			alert("请填写公寓地址!");
+			theform.addr.focus();
+			return(false);
+		}
+		else if (theform.phoneno.value == "")
+		{
+			alert("请填写联系电话!");
+			theform.phoneno.focus();
+			return(false);
+		}
+		return(true);		
+	}
+</script>
+
+<body>
+<p>
+<a href="index.html">
+<img src="img/logo1.3.4.bmp" width="280" height="70"/></a>
+</p>
+
+<div id="signup">
+<form  onsubmit="return check_signup(this)" method="post">
+  <fieldset>
+    <legend>注册信息</legend>
+	<br/>
+	用户头像
+	<br/>
+	<input type="file" name="profile" value="本地上传" />
+	<br/><br/>
+	
+    昵称
+	<br/>
+	<input type="text" name="nickname" />
+	<br/><br/>
+	
+	用户名
+	<br/>
+	<input type="text" name="name"/>
+	<br/><br/>
+	
+    密码
+	<br/>
+	<input type="password" name="password" />
+	<br/>
+	确认密码
+	<br/>
+	<input type="password" name="repassword" />
+	<br/><br/>
+
+	性别:
+	<input type="radio" name="gender" value="m" /> 男
+	<input type="radio" name="gender" value="f" /> 女
+	<input type="radio" name="gender" value="u" checked="checked"/> 保密
+	<br/><br/>
+	
+	年级
+	<br/>
+	<input type="text" name="grade" />
+	<br/><br/>
+	
+	学校
+	<br/>
+	<input type="text" name="school" />
+	<br/><br/>
+	
+	公寓地址
+	<br/>
+	<input type="text" name="addr" />
+	<br/><br/>
+	
+	联系电话
+	<br/>
+	<input type="text" name="phoneno" />
+	<br/><br/>
+	</fieldset>
+	
+	<input type="submit" value="提交" />
+</form>
+</div>
+
+
+</body>
+</html>
