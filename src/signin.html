@@ -1,0 +1,60 @@
+<html>
+<head>
+<meta charset="gb2312"/>
+<link rel="stylesheet" type="text/css" href="css/signin.css" >
+</head>
+
+<script language = "JavaScript">
+	function check_signin(signinform)
+	{
+		if (signinform.name.value == "")
+		{
+			alert("请填写账号!");
+			signinform.name.focus();
+			return(false);
+		}
+		else if (signinform.password.value=="")
+		{
+			alert("请填写密码!");
+			signinform.password.focus();
+			return(false);
+		}
+		else return(true);
+	}
+		
+</script>
+<body>
+
+<div id="head">
+<p>
+<a href="index.html"><img src="img/logo1.3.4.bmp" width="200" height="50"/></a>
+</p>
+</div>
+
+<div id="signin">
+<form onsubmit = "return check_signin(this)" method = "post" enctype="text/plain">
+  <fieldset>
+    <legend>登录信息</legend>
+	<br/>
+    账号
+	<br/>
+	<input type="text" name="name" />
+	<br/>
+    密码
+	<br/>
+	<input type="password" name="password" />
+	<br/><br/>
+	<select name="role">
+		<option value="owner">卖家</option>
+		<option value="buyer" selected="selected">买家</option>
+	</select>
+	
+	<input type="submit" value="登陆" />
+	<a href="signup.html">立即注册</a>
+	</fieldset>
+</form>
+
+</div>
+
+</body>
+</html>
