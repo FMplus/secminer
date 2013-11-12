@@ -32,7 +32,7 @@
 </div>
 
 <div id="signin">
-<form onsubmit = "return check_signin(this)" method = "post" enctype="text/plain">
+<form method = "post" action = "signin.php">
   <fieldset>
     <legend>登录信息</legend>
 	<br/>
@@ -49,7 +49,7 @@
 		<option value="buyer" selected="selected">买家</option>
 	</select>
 	
-	<input type="submit" value="登陆" />
+	<input type="submit" value="登陆"  onclick = "return check_signin(this.form);"/>
 	<a href="signup.html">立即注册</a>
 	</fieldset>
 </form>
