@@ -84,12 +84,10 @@ class goods_info_db
             $result = $this -> sm_db -> query($sql);
             if (!$result)
             {
-				echo "fuck";
                return NULL;
             }
             $row = mysql_fetch_array($result);
             $IsExisted = $row['Existed'];
-			echo $IsExisted; 
             return ($IsExisted > 0);
     }
 		
@@ -112,7 +110,24 @@ class goods_info_db
 	function add_goods($goods){
             if(!$this -> sm_db -> is_open())
                 return null;
-   
+				
+			$sid = $goods -> sid;
+			$sql = "select name 
+					from goods_info 
+					where '$sid' = `sid`";
+			$result = $this -> sm_db -> query($sql);
+			$arr = array();
+			while($row = mysql_fetch_object($result))
+			{
+				array_push($arr,$row -> name);
+			}
+			$bool = in_array($goods -> name,$arr);
+			if($bool)
+			{
+				echo "Insert failed!<br />".$goods -> name." belong to seller id ".$goods -> sid." has existed.<br /> ";
+				return NULL;
+			}
+			
             $sql = "insert into goods_info(`name`,`usingdgr`,`originalprice`,`currentprice`,`dscrb`,`quantity`,`state`,`sid`)
                     values ('{$goods -> name}','{$goods -> usingdgr}','{$goods -> originalprice}',
                     '{$goods -> currentprice}','{$goods -> dscrb}','{$goods -> quantity}','{$goods -> state}','{$goods -> sid}')";
@@ -123,10 +138,28 @@ class goods_info_db
 	function remove_goods($id){
             if(!$this -> sm_db -> is_open())
                 return null;
-                
+            if(!$this -> search_gid($id)){
+				return NULL;
+			}
+			
+			$sql = "delete from goods_photo 
+                    where '$id' = `id`";	
+			$this -> sm_db -> query($sql);
+			
+			$sql = "delete from goods_tag 
+                    where '$id' = `id`";	
+			$this -> sm_db -> query($sql);
+			
+			$sql = "delete from goods_sort
+                    where '$id' = `id`";	
+			$this -> sm_db -> query($sql);
+			
+			$sql = "delete from goods_focus 
+                    where '$id' = `id`";	
+			$this -> sm_db -> query($sql);
+			
             $sql = "delete from goods_info 
-                    where '$id' = `id`";
-                    
+                    where '$id' = `id`";	
             $result = $this -> sm_db -> query($sql);
             return $result;
         }
@@ -154,16 +187,14 @@ class goods_info_db
 			$sql   = "select photo
                       from  goods_photo
                       where '$id' = `id`";
-			echo $sql;
-			echo '<br>';
             $result = $this -> sm_db -> query($sql);
 			if($result == null)
 			{
 				return null;
 			}
-			while($row = mysql_fetch_array($result, MYSQL_ASSOC))
+			while($row = mysql_fetch_object($result))
 			{
-				array_push($goods -> photo,$row);
+				array_push($goods -> photo,$row -> photo);
 			}
 			return $goods;
         }
@@ -198,9 +229,9 @@ class goods_info_db
 			{
 				return null;
 			}
-			while($row = mysql_fetch_array($result, MYSQL_ASSOC))
+			while($row = mysql_fetch_object($result))
 			{
-				array_push($goods -> photo,$row);
+				array_push($goods -> photo,$row -> photo);
 			}
 			return $goods;
         }
