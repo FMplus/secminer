@@ -1,9 +1,9 @@
 <html>
 <head>
-<meta charset="UTF-8"/>
+<meta charset= "UTF-8"/>
 <link rel="stylesheet" type="text/css" href="css/signup.css" >
 </head>
-<script language = "JavaScript">
+<script language = JavaScript>
 	function check_signup(theform)
 	{
 		if (theform.nickname.value == "")
@@ -66,12 +66,12 @@
 
 <body>
 <p>
-<a href="index.html">
+<a href="index.php">
 <img src="img/logo1.3.4.bmp" width="280" height="70"/></a>
 </p>
 
 <div id="signup">
-<form  onsubmit="return check_signup(this)" method="post">
+<form  action = "signup.php" method="post" enctype = "multipart/form-data">
   <fieldset>
     <legend>注册信息</legend>
 	<br/>
@@ -80,7 +80,7 @@
 	<input type="file" name="profile" value="本地上传" />
 	<br/><br/>
 	
-        昵称
+    昵称
 	<br/>
 	<input type="text" name="nickname" />
 	<br/><br/>
@@ -90,7 +90,7 @@
 	<input type="text" name="name"/>
 	<br/><br/>
 	
-        密码
+    密码
 	<br/>
 	<input type="password" name="password" />
 	<br/>
@@ -126,7 +126,7 @@
 	<br/><br/>
 	</fieldset>
 	
-	<input type="submit" value="提交" />
+	<input type="submit" onclick = "return check_signup(this.form);"value="提交" />
 </form>
 </div>
 
