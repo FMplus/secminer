@@ -12,12 +12,14 @@
     $user_db    = new user_info_db();
     $user_db -> open();
     if($user_db -> check_uname_psw_ok($uname,$psw)){
-        $user_info = $user_db -> fetch_user_info($uname,$psw);
-        $_SESSION['id'] = $user_info -> id;
-        echo "<a href = 'signin.html'>密码成功，请稍等</a>";
+        $uid = $user_db -> fetch_user_id($uname);
+        $_SESSION['id'] = $uid;
+		$_SESSION['role'] = $_POST['role'];
+        echo "<a href = 'index.php'>密码成功，请稍等</a>";
         //echo "{$_SESSION['id']}"." signed in successfully!";
     }else{
         echo "<a href = 'signin.html'>密码错误，请重新登陆</a>";
     }
     $user_db -> close();
 ?>
+
