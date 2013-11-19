@@ -1,0 +1,82 @@
+<html>
+<head>
+<meta charset="UTF-8"/>
+<link rel="stylesheet" type="text/css" href="css/infogoods.css" >
+</head>
+<script language = "JavaScript">
+	function check_signup(theform)
+	{
+		if (theform.name.value == "")
+		{
+			alert("请填写商品名称!");
+			theform.name.focus();
+			return(false);
+		}
+		else if (theform.originalprice.value == "")
+		{
+			alert("请填写商品原价!");
+			theform.originalprice.focus();
+			return(false);
+		}
+		else if (theform.currentprice.value == "")
+		{
+			alert("请填写商品现价!");
+			theform.currentprice.focus();
+			return(false);
+		}
+		else if (theform.decrb.value == "")
+		{
+			alert("请填写商品描述!");
+			theform.decrb.focus();
+			return(false);
+		}
+		
+		return(true);		
+	}
+</script>
+
+<body>
+
+<div id="infogoods" >
+<form method="post" action="addgoods.php" enctype = "multipart/form-data">
+  <fieldset>
+    <legend>商品注册</legend>
+	<br/>
+	
+	商品名称：<input type="text" name="name" /><br/><br/>
+	
+	商品展示：<!--img-->
+	<input type="file" name="photo" value="上传图片" />
+	<br/><br/>
+
+	商品数量：
+	<input type="text" name="quantity" value="1" size=4/><br/><br/>
+	
+	商品新旧程度：
+	<select name="usingdgr"> 
+	<option value="1.0" selected="selected">一成新</option>
+	<option value="2.0" >二成新</option>
+	<option value="3.0" >三成新</option>
+	<option value="4.0" >四成新</option>
+	<option value="5.0" >五成新</option>
+	<option value="6.0" >六成新</option>
+	<option value="7.0" >七成新</option>
+	<option value="8.0" >八成新</option>
+	<option value="9.0" >九成新</option>
+	<option value="9.9" >十成新</option>
+	</select><br/><br/>
+	
+	商品原价：<input type="text" name="originalprice" /><br/><br/>
+	商品现价：<input type="text" name="currentprice" /><br/><br/>
+	商品描述：<br/>
+	<textarea type="text" name="dscrb" rows=10 cols=40 ></textarea>
+	<br/><br/>
+	
+	</fieldset>
+	
+	<input type="submit" value="提交" onclick="return check_signup(this.form);"/>
+</form>
+</div>
+
+</body>
+</html>
