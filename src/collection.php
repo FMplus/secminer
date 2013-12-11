@@ -2,40 +2,34 @@
     session_start();
     include_once("config.php");
     include_once("db_class.php");
-	include_once("goods_info_class.php");
-
-    function get_collection($id){
-        $res = array();
-        $dbn = new db;
-        $dbn -> open(SM_HOST,SM_DB,SM_UID,SM_PSW);
-        $sql = "select id 
-            from `goods_focus` 
-            where $id = `bid`";
-    
-        $result = $dbn -> query($sql);
-        while($row = mysql_fetch_array($result)){
-            array_push($res,$row['id']);
-        }
-        $dbn -> close();
-        return $res;
-    }
-
-    function get_goods_info($goods_id){
-        $goods_info_db = new goods_info_db;
-        $goods_info_db -> open();
-        $res = $goods_info_db -> fetch_goods_info_asid($goods_id);
-        $goods_info_db -> close();
-        return $res;
-    }
+    include_once("op_collection.php");
+    header("Content-type:text/html;charset=UTF-8");
 
     $goods_info_list    =   array();
+    $PAGE_MAX_NUM = 10;
+    $PAGE_ID = 0;
+    $MAX_PAGE_ID = 7;
+
+    if(isset($_GET['page'])){
+        $PAGE_ID = (integer)($_GET['page']);
+    }
 
     if(isset($_SESSION['id'])){
         $id                 = $_SESSION['id'];
-        $goods_id_list      = get_collection($id);
+        $count              = count_collection($id);
+        $begin = $PAGE_ID*$PAGE_MAX_NUM;
+        $PAGE_NUM = (integer)($count/$PAGE_MAX_NUM);
+        if($count%$PAGE_MAX_NUM > 0){
+            $PAGE_NUM++;
+        }
+
+        $goods_id_list      = get_collection($id,$begin,$PAGE_MAX_NUM);
+       
         foreach($goods_id_list as $goods_id){
             array_push($goods_info_list,get_goods_info($goods_id));
         }
+    }else{
+        die("请登录！");
     }
 ?>
 
@@ -91,6 +85,9 @@
         <th>
            剩余数量
         </th>
+        <th>
+           操作
+        </th>
     </tr>
     <?php foreach($goods_info_list as $goods){?>
         <tr>
@@ -110,8 +107,45 @@
             <td>
                <?=$goods->quantity?>
             </td>
+            <td>
+               <a href="collection_do.php?from='collection.php'&id=<?=$goods->id?>&do=0">取消关注</a>
+            </td>
         </tr>
     <?php null;}?>
     </table>
+    <
+<?php if($PAGE_NUM <= $MAX_PAGE_ID){
+        for($i = 1;$i <= $PAGE_NUM;$i++){
+            if($PAGE_ID == $i - 1){?>
+            <?=$i?>&nbsp
+<?php      }else{?>
+            <a href = "collection.php?page=<?= $i-1?>"><?=$i?></a>&nbsp
+<?php       }
+        }?>
+        >
+<?      }else{
+        for($i = 1;$i < $MAX_PAGE_ID;$i++){
+                    if($PAGE_ID == $i - 1){?>
+            <?=$i?>&nbsp
+ <?php      }else{?>
+            <a href = "collection.php?page=<?= $i-1?>"><?=$i?></a>&nbsp
+<?php       }
+        }?>
+        ...
+        <a href = "collection.php?page=<?= $PAGE_NUM-1?>"><?=$PAGE_NUM?></a>&nbsp
+        >
+<?php }?>
+&nbsp
+<input type = "text" name = "pageid" id = "pageid" value = '<?=$PAGE_ID+1?>' align = 'right' size = '3'/>/<?=$PAGE_NUM?>&nbsp
+<input type = "button" onclick = "jump('collection.php?page=',pageid.value - 1)" value = "Go"/>
+
+<script language = "javascript">
+    function jump(page,pageid){
+        max_page = <?=$PAGE_NUM?>;
+        if(pageid < max_page && pageid  >= 0){
+            window.location.href=page+pageid;
+        }
+    }
+</script>
 </body>
 </html>
