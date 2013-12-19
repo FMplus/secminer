@@ -51,6 +51,15 @@ class comment_info_db{
 	function add_comment_asoid($oid,$content){
 		if(!$this -> sm_db -> is_open())
                 return null;
+		
+		$sql = "select count(*) as count
+				from `comment_info`
+				where `oid` = '$oid'";
+		$result = $this -> sm_db -> query($sql);
+		$row = mysql_fetch_row($result);
+		if($row[0] > 0)
+			return -1;
+		
 		$sql = "insert into comment_info(`content`,`oid`)
 				values ('$content','$oid')";
 		$result = $this -> sm_db -> query($sql);
@@ -82,50 +91,46 @@ class comment_info_db{
 		return $result;	
 	}
 	
-	function fetch_comment_asoid($oid,$begin_no,$number){
+	function fetch_comment_asoid($oid){
 		 if(!$this -> sm_db -> is_open())
                 return null;
 		 $sql = "select *
-				 from comment_info
-				 where `oid` = '$oid'
-				 limit {$begin_no},{$number}";
+				 from `comment_info`
+				 where `oid` = '$oid'";
 		 $result = $this -> sm_db -> query($sql);
-         if (!$result)
-         {
-             return NULL;
-         }
-		 $commentarr = array();
-		 while($row = mysql_fetch_object($result)){
+		 if(!isset($result))
+			return null;
+		$row = mysql_fetch_object($result);
+		if($row != null){
 			$comment = new comment_info($id = $row -> id,
 										$time = $row -> time,
 										$content = $row -> content,
 										$oid = $row -> oid);
-			array_push($commentarr,$comment);
-		 }
-		 return $commentarr;
+			return $comment;
+		}
+		return null;
 	}
 	
-	function fetch_comment_asgid($gid,$begin_no,$number){
+	function fetch_comment_asgid($gid){
 		if(!$this -> sm_db -> is_open())
                 return null;
 		$sql = "select *
 				 from comment_info natural join order_goods
-				 where `gid` = '$gid'
-				 limit {$begin_no},{$number}";
+				 where `gid` = '$gid'";
 		
 		 $result = $this -> sm_db -> query($sql);
 		 if(!$result){
 			return null;
 		 }
-		 $commentarr = array();
-		 while($row = mysql_fetch_object($result)){
+		$row = mysql_fetch_object($result);
+		if($row != null){
 			$comment = new comment_info($id = $row -> id,
 										$time = $row -> time,
 										$content = $row -> content,
 										$oid = $row -> oid);
-			array_push($commentarr,$comment);
-		 }
-		 return $commentarr;
+			return $comment;
+		}
+		return null;
 	}
 }
 ?>
