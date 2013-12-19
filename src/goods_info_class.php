@@ -15,11 +15,11 @@ class goods_info{
 	public $state;
 	public $sid;
 	
-	public $photo ;
-	
-	function __construct($id,$name,$usingdgr,
-						 $originalprice,$currentprice,
-						 $dscrb,$quantity,$state,$sid)
+	public $photo;
+	public $tag;
+	function __construct($id = null,$name = null,$usingdgr = null,
+						 $originalprice = null,$currentprice = null,
+						 $dscrb = null,$quantity = null,$state = null,$sid = null)
 	{
 		$this -> id = $id;
 		$this -> name = $name;	
@@ -34,6 +34,7 @@ class goods_info{
 		$this -> sid = $sid;
 		
 		$this -> photo = array();
+		$this -> tag = array();
 	}
 	
 	function __toString() { 
@@ -47,7 +48,10 @@ class goods_info{
 
                                quantity   => $this -> quantity,
                                state  => $this -> state,
-                               sid  => $this -> sid]"; 
+                               sid    => $this -> sid,
+							   photo => $this -> photo
+							   tag => $this -> tag;
+							   ]"; 
         }
 }
 
@@ -76,7 +80,7 @@ class goods_info_db
         $this -> sm_db -> close();
     }
 	
-	function search_gname($name){
+	private function search_gname($name){
             if(!$this -> sm_db -> is_open())
                 return null;
             $sql = "select count(*) as Existed from goods_info 
@@ -91,7 +95,7 @@ class goods_info_db
             return ($IsExisted > 0);
     }
 		
-	function search_gid($id){
+	private function search_gid($id){
             if(!$this -> sm_db -> is_open())
                 return null;
             $sql = "select count(*) as Existed from goods_info 
@@ -127,7 +131,6 @@ class goods_info_db
 				echo "Insert failed!<br />".$goods -> name." belong to seller id ".$goods -> sid." has existed.<br /> ";
 				return NULL;
 			}
-			
             $sql = "insert into goods_info(`name`,`usingdgr`,`originalprice`,`currentprice`,`dscrb`,`quantity`,`state`,`sid`)
                     values ('{$goods -> name}','{$goods -> usingdgr}','{$goods -> originalprice}',
                     '{$goods -> currentprice}','{$goods -> dscrb}','{$goods -> quantity}','{$goods -> state}','{$goods -> sid}')";
@@ -135,31 +138,31 @@ class goods_info_db
             return $result;
     }
 	
-	function remove_goods($id){
+	function remove_goods($gid){
             if(!$this -> sm_db -> is_open())
                 return null;
-            if(!$this -> search_gid($id)){
+            if(!$this -> search_gid($gid)){
 				return NULL;
 			}
 			
 			$sql = "delete from goods_photo 
-                    where '$id' = `id`";	
+                    where '$gid' = `id`";	
 			$this -> sm_db -> query($sql);
 			
 			$sql = "delete from goods_tag 
-                    where '$id' = `id`";	
+                    where '$gid' = `id`";	
 			$this -> sm_db -> query($sql);
 			
 			$sql = "delete from goods_sort
-                    where '$id' = `id`";	
+                    where '$gid' = `id`";	
 			$this -> sm_db -> query($sql);
 			
 			$sql = "delete from goods_focus 
-                    where '$id' = `id`";	
+                    where '$gid' = `id`";	
 			$this -> sm_db -> query($sql);
 			
             $sql = "delete from goods_info 
-                    where '$id' = `id`";	
+                    where '$gid' = `id`";	
             $result = $this -> sm_db -> query($sql);
             return $result;
         }
@@ -196,18 +199,31 @@ class goods_info_db
 			{
 				array_push($goods -> photo,$row -> photo);
 			}
+			
+			$sql   = "select tag
+                      from  goods_tag
+                      where '$id' = `id`";
+            $result = $this -> sm_db -> query($sql);
+			if($result == null)
+			{
+				return null;
+			}
+			while($row = mysql_fetch_object($result))
+			{
+				array_push($goods -> tag,$row -> tag);
+			}
 			return $goods;
         }
 	
-	function fetch_goods_info_asid($id){
+	function fetch_goods_info_asid($gid){
             if(!$this -> sm_db -> is_open())
                 return null;
-            if(!$this -> search_gid($id)){
+            if(!$this -> search_gid($gid)){
                 return null;
             }
             $sql   = "select *
                       from  goods_info
-                      where '$id' = `id`";
+                      where '$gid' = `id`";
             
             $result = $this -> sm_db -> query($sql);
 			if($result == null)
@@ -223,7 +239,7 @@ class goods_info_db
 			
 			$sql   = "select photo
                       from  goods_photo
-                      where '$id' = `id`";
+                      where '$gid' = `id`";
             $result = $this -> sm_db -> query($sql);
 			if($result == null)
 			{
@@ -233,60 +249,216 @@ class goods_info_db
 			{
 				array_push($goods -> photo,$row -> photo);
 			}
+			
+			$sql   = "select tag
+                      from  goods_tag
+                      where '$gid' = `id`";
+            $result = $this -> sm_db -> query($sql);
+			if($result == null)
+			{
+				return null;
+			}
+			while($row = mysql_fetch_object($result))
+			{
+				array_push($goods -> tag,$row -> tag);
+			}
 			return $goods;
         }
 		
-	function update_goods_quantity($id,$int){
+	function  fetch_goodsid(){
+		if(!$this -> sm_db -> is_open())
+            return null;
+        $sql = "SELECT LAST_INSERT_ID()";
+        $result = $this -> sm_db -> query($sql);
+		$row = mysql_fetch_row($result);
+		$id = $row[0];
+        return $id;
+	}
+	
+	function update_goods_quantity($gid,$int){
             if(!$this -> sm_db -> is_open())
                 return null;
             $sql = "update goods_info 
 					set `quantity` = '$int'  
-					where `id` = '$id'";
+					where `id` = '$gid'";
             $result = $this -> sm_db -> query($sql);
             return $result;
     }
 	
-	function update_goods_dscrb($id,$dscrb){
+	function update_goods_dscrb($gid,$dscrb){
             if(!$this -> sm_db -> is_open())
                 return null;
             $sql = "update goods_info 
 					set `dscrb` = '$dscrb'
-					where '$id' = `id`";
-			echo $sql;
+					where '$gid' = `id`";
             $result = $this -> sm_db -> query($sql);
             return $result;
     }
 	
-	function update_goods_currentprice($id,$price){
+	function update_goods_currentprice($gid,$price){
             if(!$this -> sm_db -> is_open())
                 return null;
             $sql = "update goods_info 
 					set `currentprice` = '$price'  
-					where `id` = '$id'";
+					where `id` = '$gid'";
             $result = $this -> sm_db -> query($sql);
             return $result;
     }
 	
-	function update_goods_originalprice($id,$price){
+	function update_goods_name($gid,$name){
+			if(!$this -> sm_db -> is_open())
+				return null;
+			$sql = "update goods_info
+					set `name` = '$name'
+					where `id` = '$gid'";
+			$result = $this -> sm_db -> query($sql);
+            return $result;		
+	}
+	
+	function update_goods_usingdgr($gid,$usingdgr){
+			if(!$this -> sm_db -> is_open())
+				return null;
+			$sql = "update goods_info
+					set `usingdgr` = '$usingdgr'
+					where `id` = '$gid'";
+			$result = $this -> sm_db -> query($sql);
+            return $result;		
+	}
+	
+	function update_goods_originalprice($gid,$price){
             if(!$this -> sm_db -> is_open())
                 return null;
             $sql = "update goods_info 
 					set `originalprice` = '$price'  
-					where `id` = '$id'";
+					where `id` = '$gid'";
             $result = $this -> sm_db -> query($sql);
             return $result;
     }
 	
-	function update_goods_state($id){
+	function update_goods_state($gid,$state){
             if(!$this -> sm_db -> is_open())
                 return null;
             $sql = "update goods_info 
-					set `state` = 'sellout'  
-					where `id` = '$id' and `quantity` = '0'";
+					set `state` = '$state'  
+					where `id` = '$gid'";
             $result = $this -> sm_db -> query($sql);
             return $result;
     }
-}
+	
+	function update_goods_photo($gid,$ophoto,$nphoto){
+			if(!$this -> sm_db -> is_open())
+                return null;
+			$sql = "update goods_photo set 
+				   `photo` = '$nphoto'
+					where `id` = '$gid' and `photo` = '$ophoto'";
+			$result = $this -> sm_db -> query($sql);
+            return $result;
+	}
+	
+	function add_goods_photo($gid,$parr){
+			if(!$this -> sm_db -> is_open())
+                return null;
+			for($x = 0; $x < count($parr); $x++){
+				$photo = $parr[$x];
+				$sql = "insert into goods_photo(id,photo) 
+					   values('$gid','$photo')";
+				$result = $this -> sm_db -> query($sql);
+            }
+	}
+	
+	function delete_goods_photo($gid,$photo){
+			if(!$this -> sm_db -> is_open())
+                return null;
+			$sql = "delete from goods_photo 
+					where `id` = '$gid' and `photo` = '$photo'";
+			$result = $this -> sm_db -> query($sql);
+			return $result;
+	}
+	
+	function add_goods_tag($gid,$tarr){
+			if(!$this -> sm_db -> is_open())
+                return null;
+			for($x = 0; $x < count($tarr); $x++){
+				$tag = $tarr[$x];
+				$sql = "insert into goods_tag(id,tag) 
+					   values('$gid','$tag')";
+				$result = $this -> sm_db -> query($sql);
+            }
+	}
+	
+	function delete_goods_tag($gid,$tag){
+			if(!$this -> sm_db -> is_open())
+                return null;
+			$sql = "delete from goods_tag 
+					where `id` = '$gid' and `tag` = '$tag'";
+			$result = $this -> sm_db -> query($sql);
+			return $result;
+	}
 
+	function fetch_goods_price($gid){
+			if(!$this -> sm_db -> is_open())
+                return null;
+			$sql = "select currentprice
+					from goods_info
+					where `id` = '$gid'";
+			$result = $this -> sm_db -> query($sql);
+			$row = mysql_fetch_object($result);
+			return $row -> currentprice;
+		}
+			
+	function fetch_goods_sid($gid){
+		if(!$this -> sm_db -> is_open())
+            return null;
+		$sql = "select sid
+				from goods_info
+				where `id` = '$gid'";
+		$result = $this -> sm_db -> query($sql);
+		$row = mysql_fetch_object($result);
+		return $row -> sid;
+	}
+	
+	function fetch_allgoods(){
+		if(!$this -> sm_db -> is_open())
+            return null;
+		$sql = "select id
+				from  goods_info;";
+		$result = $this -> sm_db -> query($sql);
+		$arr = array();
+		while($row = mysql_fetch_object($result)){
+			array_push($arr,$row -> id);
+		}
+		return $arr;
+	}
+	
+	function fetch_sellergoods($sid,$begin_no,$number){
+		if(!$this -> sm_db -> is_open())
+            return null;
+		$sql = "select id
+				from  goods_info
+				where `sid` = '$sid'
+                order by `sid`
+                limit {$begin_no},{$number}";
+		$result = $this -> sm_db -> query($sql);
+		$arr = array();
+		while($row = mysql_fetch_object($result)){
+			array_push($arr,$row -> id);
+		}
+		return $arr;
+	}
+
+    function seller_goods_count($sid){
+        $sql = "select count(*) as count
+                from  `goods_info`
+                where `sid` = '$sid'";
+                
+        $result = $this -> sm_db -> query($sql);
+        if(!$result){
+            die("Wrong with the database connection!");
+        }
+        $row = mysql_fetch_array($result);
+
+        return $row['count'];
+    }
+}
 ?>
 
