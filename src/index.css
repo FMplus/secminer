@@ -1,11 +1,15 @@
-div#statesign{background-color:#ffffff;float:right;text-align:right;height:30px;width:192px;}
+div#statesign{background-color:#ffffff;float:right;text-align:right;height:30px;width:20%;}
 div#container{width:1000px;background-color:#ffffff;}
-div#header {background-color:#ffffff;text-align:center;height:120px;width:799px;float:left;}
-div#content {background-color:#ffffff;height:600px;width:100%;float:left;}
+div#header {margin-left: 10%;background-color:#ffffff;text-align:center;height:120px;width:80%;float:left;}
+div#content {margin-left: 18%;background-color:#ffffff;width:100%;float:left;}
 div#footer {background-color:#ffffff;clear:both;text-align:center;}
-div#navi_bar{background-color:#ffffff;clear:both;text-align:center;float:left;}
+div#navi_bar{margin-left: 21%;background-color:#ffffff;clear:both;text-align:center;float:center;}
 div#signout{background-color:#ffffff;text-align:center;}
-
+div#buyerneed{background-color:#ffffff;float:left;width:100%;font-family: sans-serif;}
+div#photo{background-color:#ffffff;float:left;width:12%;font-family: sans-serif;}
+div#message{background-color:#ffffff;float:left;width:80%;font-family: sans-serif;}
+div#page{background-color:#ffffff;float:right; text-align:center; width:100%;font-family: sans-serif;}
+h5.message {font-family: Georgia, serif;}
 h1 {margin-bottom:0;}
 h2 {margin-bottom:0;font-size:18px;}
 ul
