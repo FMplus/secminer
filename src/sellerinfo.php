@@ -3,28 +3,25 @@
 	include_once 'user_info_class.php';
 	$user_db = new user_info_db();
 	$user_db -> open();
-	$user_info = $user_db -> fetch_user_info($_SESSION['id']);
-	//$gender = 'm';
-	//$photo = 'img/Desert.jpg';
-	//$id = "007";
+	$user_info = $user_db -> fetch_user_info($_GET['uid']);
 	$user_db -> close();
+	
 ?>
-<!--这里是卖家信息显示页面，需要调取卖家的个人信息显示，和登陆有所不同-->
-<!--由于还没有连上数据库，先临时写一个变量用来测试-->
+
 <html>
 <head>
 <meta charset="UTF-8"/>
-<link rel="stylesheet" type="text/css" href="css/infocenter.css" >
+<link rel="stylesheet" type="text/css" href="css/sellerinfocenter.css" >
 </head>
 <body>
 
-<div id="buyerinfo">
+<div id="sellerinfo">
 <form >
   <fieldset>
-    <legend>卖家信息</legend>
+    <legend><?= $user_info -> name ?> 的信息</legend>
 	<br/>
 	用户头像:
-	<img src="<?= $user_info -> profile ?>" height = '12%' width = '12%'/>
+	<img src="<?= $user_info -> profile ?>" height = '100px' width = '100px'/>
 	<br/><br/>
 		
     昵称：
@@ -45,7 +42,7 @@
 	<br/><br/>
 	
 	学校:
-	<?=  $user_info -> school ?>
+	<?= $user_info -> school ?>
 	<br/><br/>
 	
 	公寓地址:
