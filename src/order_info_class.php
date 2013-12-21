@@ -120,6 +120,20 @@
 				return NULL;
 			}
 			
+			/*If bid = sid, at this time the system should not allow to add order.
+			First step : get sid as gid.
+			Final step : compare sid , bid*/
+			$gid = $new_order -> gid;
+			$sql = "select `sid`
+					from `goods_info`
+					where `id` = '$gid'";
+			$result = $this -> sm_db -> query($sql);
+			$row = mysql_fetch_object($result);
+			$sid = $row -> sid;
+			if($sid == $new_order -> bid){
+				echo "不允许自己给自己下订单!".'<br/>';
+				return -1;
+			}
             /*add order into order db*/
 			$state = $new_order -> state;
 			$bid = $new_order -> bid;
@@ -127,7 +141,6 @@
 			
 			$sql = "insert into order_info(state,bid,totalcost)
 					values('$state','$bid','$totalcost')";
-			
 			$result = $this -> sm_db -> query($sql);
             /*get order id*/
 			$sql = "SELECT LAST_INSERT_ID()";
@@ -136,7 +149,6 @@
 			$id = $row[0];
 			/*add info into  order_goods*/
 			$quantity = $new_order -> number;
-			$gid = $new_order -> gid;
 			$price = $new_order -> price;
 			$sql = "insert into order_goods(gid,oid,quantity,price)
 					values('$gid','$id','$quantity','$price')";
@@ -201,11 +213,23 @@
 				echo "The order's state is : ".$oldstate.'<br />';
 				echo "The state can not be updated!".'<br />';
 			}
-
+				
+			if($state == 'canceled'){
+				$sql = "select `quantity`,`gid`
+						from `order_goods`
+						where `oid` = '$order_id'";
+				$result = $this -> sm_db -> query($sql);
+				$row = mysql_fetch_object($result);
+				$quantity = $row -> quantity;
+				$gid = $row -> gid;
+				$sql = "update `goods_info`
+						set `quantity` = `quantity` + '$quantity'
+						where `id` = '$gid'";
+				$result = $this -> sm_db -> query($sql);
+			}
 			$sql = "update order_info
 					set `state` = '$state' 
 					where `id` = '$order_id'";
-
 			$result = $this -> sm_db -> query($sql);
 			return $result;
         }
@@ -213,13 +237,14 @@
         function update_order_info($order){
             //just update order info such as the order state or others identified by $order->id
         }
-
+	
         function cancel_order($order_id){
           	if(!$this -> sm_db -> is_open())
                 return null;
 			$sql = "select state
 					from order_info
 					where `id` = '$order_id'";
+			echo $sql;
 			$result = $this -> sm_db -> query($sql);
 			$row = mysql_fetch_object($result);
 			$state = $row -> state;
