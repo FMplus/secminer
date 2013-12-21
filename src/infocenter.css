@@ -1,0 +1,70 @@
+div#screen{background-color:#ffffff;float:left;width:80%;}
+div#navi{background-color:#ffffff;float:left;width:20%;}
+div#buyerorder{background-color:#ffffff;float:left;width:80%;}
+div#msgborad{background-color:#ffffff;float:left;width:80%;}
+div#buyermessage{background-color:#ffffff;float:left;width:100%;font-family: sans-serif;}
+div#needmsg{background-color:#ffffff;float:left;width:90%;font-family: sans-serif;}
+div#output{background-color:#ffffff;float:left;width:10%;font-family: sans-serif;}
+div#pushwindow{background-color:#ffffff;float:left;width:100%;font-family: sans-serif;}
+div#userinfo{background-color:#ffffff;float:left;width:100%;font-family:sans-serif;}
+div#sellerinfo{background-color:#ffffff;float:left;width:50%;font-family:sans-serif;}
+h5.message {font-family: Georgia, serif;}
+ul
+{
+list-style-type:none;
+margin:0;
+padding:0;
+overflow:hidden;
+}
+a.one:link,a.one:visited
+{
+width:100px;
+font-weight:bold;
+color:#FFFFFF;
+display:block;
+background-color:#add8e6;
+text-align:center;
+padding:6px;
+text-decoration:none;
+text-transform:uppercase;
+}
+a.one:hover,a.one:active
+{
+background-color:#bebebe;
+}
+a.two:link,a.two:visited
+{
+width:100px;
+font-weight:bold;
+color:#FFFFFF;
+display:block;
+background-color:#bebebe;
+text-align:center;
+padding:6px;
+text-decoration:none;
+text-transform:uppercase;
+}
+a.two:hover,a.two:active
+{
+background-color:#bebebe;
+}
+table
+{
+border-collapse:collapse;
+}
+table, td, th
+{
+font-size:1em;
+border:1px solid #1090FF;
+padding:3px 7px 2px 7px;
+line-height:25px;
+}
+th 
+  {
+  font-size:1.1em;
+  text-align:left;
+  padding-top:5px;
+  padding-bottom:4px;
+  background-color:#ADD8E6;
+  color:#ffffff;
+  }
