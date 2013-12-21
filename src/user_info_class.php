@@ -1,6 +1,6 @@
 <?php
     include_once("config.php");
-
+	include_once("db_class.php");
     class user_info{
         public $id;
         public $name;
@@ -14,9 +14,9 @@
         public $profile;
         public $phoneno;
 
-        function __construct($id,$name,$nickname,
-                             $addr,$gender,$grade,
-                             $school,$profile,$phoneno){
+        function __construct($id = null,$name = null,$nickname = null,
+                             $addr = null,$gender = null,$grade = null,
+                             $school = null,$profile = null,$phoneno = null){
             $this -> name    = $name;
             $this -> id      = $id;
             $this -> nickname= $nickname;
@@ -46,48 +46,7 @@
                                phoneno  => $this -> phoneno]"; 
         }
     }
-        
-    class db{
-        private $db_con;
-        
-        function __construct(){
-            $this -> db_con = null;
-        }
 
-        function __destruct(){
-            $this -> close();
-        }
-        
-        function open($host,$dbn,$uid,$psw){
-            $this -> close();
-            $this -> db_con = mysql_connect($host,$uid,$psw);
-            if(!$this -> db_con){
-                return null;
-            }
-            mysql_select_db($dbn, $this -> db_con);
-            $this -> query('SET NAMES GBK');
-            return $this ->db_con;
-        }
-
-        function is_open(){
-            return $this -> db_con?true:false;
-        }
-
-        function close(){
-            if($this -> db_con){
-                mysql_close($this -> db_con);
-                $this -> db_con = null;
-            }
-        }
-
-        function query($sql){
-            if(!$this -> db_con){
-                return null;
-            }
-            return mysql_query($sql,$this ->db_con);
-        }
-    }
-        
     class user_info_db{
         private $sm_db;
         private $lock;
@@ -171,20 +130,31 @@
             return $result;
         }
 
-        function fetch_user_info($uname,$psw){
+        function fetch_user_info($uid){
             if(!$this -> sm_db -> is_open())
                 return null;
-            if(!$this -> check_uname_psw_ok($uname,$psw)){
-                die('Error: uname or password not match!');
-            }
             $sql   = "select id,name,nickname,addr,gender,grade,school,profile,phoneno
+                      from user_info 
+                      where ('$uid' = `id`)";
+            
+            $result = $this -> sm_db -> query($sql);
+            $row = mysql_fetch_array($result);
+            
+            return new user_info($row['id'],$row['name'],$row['nickname'],$row['addr'],$row['gender'],$row['grade'],$row['school'],$row['profile'],$row['phoneno']);
+        }
+
+        function fetch_user_id($uname){
+            if(!$this -> sm_db -> is_open())
+                return null;
+
+            $sql   = "select id
                       from user_info 
                       where ('$uname' = `name`)";
             
             $result = $this -> sm_db -> query($sql);
             $row = mysql_fetch_array($result);
             
-            return new user_info($row['id'],$row['name'],$row['nickname'],$row['addr'],$row['gender'],$row['grade'],$row['school'],$row['profile'],$row['phoneno']);
+            return $row['id'];
         }
 
         function update_user_info($uid,$user){
