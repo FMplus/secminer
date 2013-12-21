@@ -1,151 +1,136 @@
 <?php
-    session_start();
-    include_once("config.php");
-    include_once("db_class.php");
-    include_once("op_collection.php");
-    header("Content-type:text/html;charset=UTF-8");
+include_once("config.php");
+include_once("db_class.php");
 
-    $goods_info_list    =   array();
-    $PAGE_MAX_NUM = 10;
-    $PAGE_ID = 0;
-    $MAX_PAGE_ID = 7;
+class comment_info{
+	public $id;
+	public $time;
+	public $content;
+	public $oid;
+	function __construct($id = null,$time = null, $content = null,$oid = null){
+		$this -> id = $id;
+		$this -> time = $time;
+		
+		$this -> content = $content;
+		$this -> oid = $oid;
+	}
+	
+	function __toString(){
+		return "comment_info[id 		=> $this -> id,
+							 time 		=> $this -> time,
+							 content 	=> $this -> content,
+							 oid		=> $this -> oid
+		]";
+	}
+}
 
-    if(isset($_GET['page'])){
-        $PAGE_ID = (integer)($_GET['page']);
+class comment_info_db{
+	private $sm_db;
+    private $lock;
+
+    function __construct(){
+        $this -> sm_db = new db();
+    }
+        
+    function __destruct(){
+         $this -> sm_db -> close();
     }
 
-    if(isset($_SESSION['id'])){
-        $id                 = $_SESSION['id'];
-        $count              = count_collection($id);
-        $begin = $PAGE_ID*$PAGE_MAX_NUM;
-        $PAGE_NUM = (integer)($count/$PAGE_MAX_NUM);
-        if($count%$PAGE_MAX_NUM > 0){
-            $PAGE_NUM++;
-        }
-
-        $goods_id_list      = get_collection($id,$begin,$PAGE_MAX_NUM);
-       
-        foreach($goods_id_list as $goods_id){
-            array_push($goods_info_list,get_goods_info($goods_id));
-        }
-    }else{
-        die("请登录！");
+    function lock(){
+            
     }
+	
+	function open(){
+        return $this -> sm_db -> open(SM_HOST,SM_DB,SM_UID,SM_PSW);
+    }
+  
+    function close(){
+        $this -> sm_db -> close();
+    }
+	
+	function add_comment_asoid($oid,$content){
+		if(!$this -> sm_db -> is_open())
+                return null;
+		
+		$sql = "select count(*) as count
+				from `comment_info`
+				where `oid` = '$oid'";
+		$result = $this -> sm_db -> query($sql);
+		$row = mysql_fetch_row($result);
+		if($row[0] > 0)
+			return -1;
+		
+		$sql = "insert into comment_info(`content`,`oid`)
+				values ('$content','$oid')";
+		$result = $this -> sm_db -> query($sql);
+		
+		/*Get comment id*/
+		$sql = "SELECT LAST_INSERT_ID()";
+		$result = $this -> sm_db -> query($sql);
+		$row = mysql_fetch_row($result);
+		$id = $row[0];
+		return $id;
+	}
+	
+	function change_comment_asid($cid,$content){
+		if(!$this -> sm_db -> is_open())
+                return null;
+		$sql = "update comment_info
+				set `content` = '$content'
+				where `id` = '$cid'";
+		$result = $this -> sm_db -> query($sql);
+		return $result;
+	}
+	
+	function delete_comment_asid($cid){
+		if(!$this -> sm_db -> is_open())
+                return null;
+		$sql = "delete from comment_info
+				where `id` = '$cid'";
+		$result = $this -> sm_db -> query($sql);
+		return $result;	
+	}
+	
+	function fetch_comment_asoid($oid){
+		 if(!$this -> sm_db -> is_open())
+                return null;
+		 $sql = "select *
+				 from `comment_info`
+				 where `oid` = '$oid'";
+		 $result = $this -> sm_db -> query($sql);
+		 if(!isset($result))
+			return null;
+		$row = mysql_fetch_object($result);
+		if($row != null){
+			$comment = new comment_info($id = $row -> id,
+										$time = $row -> time,
+										$content = $row -> content,
+										$oid = $row -> oid);
+			return $comment;
+		}
+		return null;
+	}
+	
+	function fetch_comment_asgid($gid){
+		if(!$this -> sm_db -> is_open())
+                return null;
+		$sql = "select *
+				 from comment_info natural join order_goods
+				 where `gid` = '$gid'";
+		
+		 $result = $this -> sm_db -> query($sql);
+		 if(!$result){
+			return null;
+		 }
+		$row = mysql_fetch_object($result);
+		if($row != null){
+			$comment = new comment_info($id = $row -> id,
+										$time = $row -> time,
+										$content = $row -> content,
+										$oid = $row -> oid);
+			return $comment;
+		}
+		return null;
+	}
+}
 ?>
-
-<html>
-<head>
-<meta charset="UTF-8"/>
-<style type="text/css">
-#collections
-  {
-    width:500px;
-    border-collapse:collapse;
-  }
-
-#collections td, #collections th 
-  {
-  font-size:1em;
-  border:1px solid #1090FF;
-  padding:3px 7px 2px 7px;
-  line-height:25px;
-  }
-
-#collections th 
-  {
-  font-size:1.1em;
-  text-align:left;
-  padding-top:5px;
-  padding-bottom:4px;
-  background-color:#ADD8E6;
-  color:#ffffff;
-  line-height:25px;
-  }
-
-#collections td 
-  {
-  line-height:25px;
-  color:#000000;
-  background-color:#ffffff;
-  }
-</style>
-</head>
-<body>
-    <table id = "collections">
-    <tr>
-        <th>
-           商品号     
-        </th>
-        <th>
-           商品名称
-        </th>
-        <th>
-           商品价格   
-        </th>
-        <th>
-           剩余数量
-        </th>
-        <th>
-           操作
-        </th>
-    </tr>
-    <?php foreach($goods_info_list as $goods){?>
-        <tr>
-            <td>
-               <a href = "goodsinfo.php?id=<?=$goods->id?>" target="_top">
-                    <?=$goods->id?>
-               </a>
-            </td>
-            <td>
-               <a href = "goodsinfo.php?id=<?=$goods->id?>" target="_top">
-                <?=$goods->name?>
-               </a>
-            </td>
-            <td>
-               <?=$goods->currentprice?>
-            </td>
-            <td>
-               <?=$goods->quantity?>
-            </td>
-            <td>
-               <a href="collection_do.php?from='collection.php'&id=<?=$goods->id?>&do=0">取消关注</a>
-            </td>
-        </tr>
-    <?php null;}?>
-    </table>
-    <
-<?php if($PAGE_NUM <= $MAX_PAGE_ID){
-        for($i = 1;$i <= $PAGE_NUM;$i++){
-            if($PAGE_ID == $i - 1){?>
-            <?=$i?>&nbsp
-<?php      }else{?>
-            <a href = "collection.php?page=<?= $i-1?>"><?=$i?></a>&nbsp
-<?php       }
-        }?>
-        >
-<?      }else{
-        for($i = 1;$i < $MAX_PAGE_ID;$i++){
-                    if($PAGE_ID == $i - 1){?>
-            <?=$i?>&nbsp
- <?php      }else{?>
-            <a href = "collection.php?page=<?= $i-1?>"><?=$i?></a>&nbsp
-<?php       }
-        }?>
-        ...
-        <a href = "collection.php?page=<?= $PAGE_NUM-1?>"><?=$PAGE_NUM?></a>&nbsp
-        >
-<?php }?>
-&nbsp
-<input type = "text" name = "pageid" id = "pageid" value = '<?=$PAGE_ID+1?>' align = 'right' size = '3'/>/<?=$PAGE_NUM?>&nbsp
-<input type = "button" onclick = "jump('collection.php?page=',pageid.value - 1)" value = "Go"/>
-
-<script language = "javascript">
-    function jump(page,pageid){
-        max_page = <?=$PAGE_NUM?>;
-        if(pageid < max_page && pageid  >= 0){
-            window.location.href=page+pageid;
-        }
-    }
-</script>
-</body>
-</html>
